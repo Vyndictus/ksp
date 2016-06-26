@@ -65,9 +65,17 @@ def new():
 def edit(stage):
 	global stagenum
 	stagenum=int(stage)
-	for child in entry.winfo_children():
-		child.configure(state="normal")
+	for child in entry.winfo_children(): #If new stage - just enable all widgets
 			child.configure(state="normal")
+	if len(newrocket.stages) >= stagenum: #If Stage exists, populate with existing values
+		mass_var.set(newrocket.stages[stagenum-1].mass_full)
+		type_var.set(newrocket.stages[stagenum-1].fuel_type)
+		fuel_var.set(newrocket.stages[stagenum-1].fuel_vol)
+		ox_var.set(newrocket.stages[stagenum-1].ox_vol)
+		isp_var.set(newrocket.stages[stagenum-1].Isp)
+	
+	StageNum_lbl.configure(state="normal")
+	mass_lbl.configure(state="normal")
     
 # Function for "Done" button
 def done(*args):
