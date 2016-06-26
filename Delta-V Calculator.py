@@ -67,6 +67,7 @@ def edit(stage):
 	stagenum=int(stage)
 	for child in entry.winfo_children():
 		child.configure(state="normal")
+			child.configure(state="normal")
     
 # Function for "Done" button
 def done(*args):
