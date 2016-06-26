@@ -63,20 +63,21 @@ def new():
 
 # Function for "Edit" button
 def edit(stage):
-    for child in entry.winfo_children():
-        child.configure(state="normal")
-    stagenum.set(int(stage))
-
+	global stagenum
+	stagenum=int(stage)
+	for child in entry.winfo_children():
+		child.configure(state="normal")
+    
 # Function for "Done" button
 def done(*args):
     newstage = stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),int(ox_var.get()),int(isp_var.get()))
-    if len(newrocket.stages) >= stagenum.get():
-        newrocket.stages[stagenum.get()-1] = newstage
+    if len(newrocket.stages) >= stagenum:
+        newrocket.stages[stagenum-1] = newstage
     else:
         newrocket.stages.append(newstage)
     try:
         stage_dv = int(newstage.delta_v())
-        dvlist[stagenum.get()-1].configure(text=str(stage_dv))
+        dvlist[stagenum-1].configure(text=str(stage_dv))
         rocket_dv = int(newrocket.delta_v())
         dv_sum.configure(text=str(rocket_dv))
         mass_ent.delete(0, 'end')
@@ -85,8 +86,8 @@ def done(*args):
         isp_ent.delete(0, 'end')
     except ValueError:
         pass
-    stagelist[stagenum.get()].config(state="normal")
-    editlist[stagenum.get()].config(state="normal")
+    stagelist[stagenum].config(state="normal")
+    editlist[stagenum].config(state="normal")
     for child in entry.winfo_children():
         child.configure(state="disabled")
     # dvsum = int(newrocket.delta_v())
@@ -108,7 +109,7 @@ fuel_var = StringVar()
 ox_var = StringVar()
 isp_var = StringVar()
 newrocket = rocket()
-stagenum = IntVar()
+stagenum = -1
 stagelist = []
 dvlist = []
 editlist = []
