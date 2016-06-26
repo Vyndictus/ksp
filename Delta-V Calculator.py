@@ -1,4 +1,3 @@
-# Testing GitHub Branching
 # Delta-V Calculator - GUI Version
 
 from tkinter import *
@@ -14,15 +13,12 @@ class rocket(object):
 		total = 0
 		# print(total)
 		for stages in self.stages:
-			# print(stages.delta_v())
 			total = total + stages.delta_v()
-			# print(total)
 		return total
 		   
 #Define Stage Class
 class stage(object):
 	def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, thrust=0):
-		#self.name = name
 		self.mass_full = mass
 		self.fuel_type = fuel_type
 		self.fuel_vol = fuel_vol
@@ -60,8 +56,6 @@ def new():
 		stagelist[i].configure(state="disabled")
 		dvlist[i].configure(text="")
 		editlist[i].configure(state="disabled")
-	# for child in results.winfo_children():
-	#     child.configure(state="disabled")
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
 	stagelist[0].config(state="normal")
@@ -99,20 +93,13 @@ def done(*args):
 		rocket_dv = int(newrocket.delta_v())
 		dv_sum.configure(text=str(rocket_dv))
 		clear_stage()
-		# mass_ent.delete(0, 'end')
-		# fuel_ent.delete(0, 'end')
-		# ox_ent.delete(0, 'end')
-		# isp_ent.delete(0, 'end')
 	except ValueError:
 		pass
 	stagelist[stagenum].config(state="normal")
 	editlist[stagenum].config(state="normal")
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
-	# dvsum = int(newrocket.delta_v())
-	# print(dvsum)
-	# newrocket.delta_v()
-		
+			
 root = Tk()
 root.title("KSP Delta-V Calculator")
 
