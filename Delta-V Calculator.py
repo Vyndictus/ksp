@@ -7,59 +7,67 @@ import math
 
 #Define Rocket Class - Starting as just a list of stages.
 class rocket(object):
-    def __init__(self):
-        self.stages = []
-    # Calculate and Return Total Delta-V
-    def delta_v(self):
-        total = 0
-        # print(total)
-        for stages in self.stages:
-            # print(stages.delta_v())
-            total = total + stages.delta_v()
-            # print(total)
-        return total
-           
+	def __init__(self):
+		self.stages = []
+	# Calculate and Return Total Delta-V
+	def delta_v(self):
+		total = 0
+		# print(total)
+		for stages in self.stages:
+			# print(stages.delta_v())
+			total = total + stages.delta_v()
+			# print(total)
+		return total
+		   
 #Define Stage Class
 class stage(object):
-    def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, thrust=0):
-        #self.name = name
-        self.mass_full = mass
-        self.fuel_type = fuel_type
-        self.fuel_vol = fuel_vol
-        self.ox_vol = ox_vol
-        self.Isp = Isp
-        self.thrust = thrust
-    #Returns Mass of the Fuel
-    def mass_fuel(self):
-        if self.fuel_type == 1:
-            mass = self.fuel_vol * .0075
-        else:
-            mass = (self.fuel_vol+self.ox_vol) * .005
-        return mass
-    #Returns Delta-V for the stage
-    def delta_v(self):
-        self.dv = math.log(self.mass_full/(self.mass_full-self.mass_fuel()))*self.Isp*9.81
-        return self.dv
-    #Returns the Trust to Weight Ratio for the stage
-    def TWR(self):
-        twr = self.thrust / (self.mass_full*9.82)
-        return twr
+	def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, thrust=0):
+		#self.name = name
+		self.mass_full = mass
+		self.fuel_type = fuel_type
+		self.fuel_vol = fuel_vol
+		self.ox_vol = ox_vol
+		self.Isp = Isp
+		self.thrust = thrust
+	#Returns Mass of the Fuel
+	def mass_fuel(self):
+		if self.fuel_type == 1:
+			mass = self.fuel_vol * .0075
+		else:
+			mass = (self.fuel_vol+self.ox_vol) * .005
+		return mass
+	#Returns Delta-V for the stage
+	def delta_v(self):
+		self.dv = math.log(self.mass_full/(self.mass_full-self.mass_fuel()))*self.Isp*9.81
+		return self.dv
+	#Returns the Trust to Weight Ratio for the stage
+	def TWR(self):
+		twr = self.thrust / (self.mass_full*9.82)
+		return twr
 
+
+# Function for clearing stage entry value variable
+def clear_stage():
+	mass_ent.delete(0, 'end')
+	fuel_ent.delete(0, 'end')
+	ox_ent.delete(0, 'end')
+	isp_ent.delete(0, 'end')
 
 # Function for "New Rocket" button
 def new():
-    for i in range(0,numStages):
-        stagelist[i].configure(state="disabled")
-        dvlist[i].configure(text="")
-        editlist[i].configure(state="disabled")
-    # for child in results.winfo_children():
-    #     child.configure(state="disabled")
-    for child in entry.winfo_children():
-        child.configure(state="disabled")
-    stagelist[0].config(state="normal")
-    editlist[0].config(state="normal")
-    dv_sum.configure(text="")
-    del newrocket.stages[:]
+	clear_stage()
+	for i in range(0,numStages):
+		stagelist[i].configure(state="disabled")
+		dvlist[i].configure(text="")
+		editlist[i].configure(state="disabled")
+	# for child in results.winfo_children():
+	#     child.configure(state="disabled")
+	for child in entry.winfo_children():
+		child.configure(state="disabled")
+	stagelist[0].config(state="normal")
+	editlist[0].config(state="normal")
+	dv_sum.configure(text="")
+	del newrocket.stages[:]
 
 # Function for "Edit" button
 def edit(stage):
@@ -67,6 +75,7 @@ def edit(stage):
 	stagenum=int(stage)
 	for child in entry.winfo_children(): #If new stage - just enable all widgets
 			child.configure(state="normal")
+	clear_stage()
 	if len(newrocket.stages) >= stagenum: #If Stage exists, populate with existing values
 		mass_var.set(newrocket.stages[stagenum-1].mass_full)
 		type_var.set(newrocket.stages[stagenum-1].fuel_type)
@@ -76,33 +85,34 @@ def edit(stage):
 	
 	StageNum_lbl.configure(state="normal")
 	mass_lbl.configure(state="normal")
-    
+	
 # Function for "Done" button
 def done(*args):
-    newstage = stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),int(ox_var.get()),int(isp_var.get()))
-    if len(newrocket.stages) >= stagenum:
-        newrocket.stages[stagenum-1] = newstage
-    else:
-        newrocket.stages.append(newstage)
-    try:
-        stage_dv = int(newstage.delta_v())
-        dvlist[stagenum-1].configure(text=str(stage_dv))
-        rocket_dv = int(newrocket.delta_v())
-        dv_sum.configure(text=str(rocket_dv))
-        mass_ent.delete(0, 'end')
-        fuel_ent.delete(0, 'end')
-        ox_ent.delete(0, 'end')
-        isp_ent.delete(0, 'end')
-    except ValueError:
-        pass
-    stagelist[stagenum].config(state="normal")
-    editlist[stagenum].config(state="normal")
-    for child in entry.winfo_children():
-        child.configure(state="disabled")
-    # dvsum = int(newrocket.delta_v())
-    # print(dvsum)
-    # newrocket.delta_v()
-        
+	newstage = stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),int(ox_var.get()),int(isp_var.get()))
+	if len(newrocket.stages) >= stagenum:
+		newrocket.stages[stagenum-1] = newstage
+	else:
+		newrocket.stages.append(newstage)
+	try:
+		stage_dv = int(newstage.delta_v())
+		dvlist[stagenum-1].configure(text=str(stage_dv))
+		rocket_dv = int(newrocket.delta_v())
+		dv_sum.configure(text=str(rocket_dv))
+		clear_stage()
+		# mass_ent.delete(0, 'end')
+		# fuel_ent.delete(0, 'end')
+		# ox_ent.delete(0, 'end')
+		# isp_ent.delete(0, 'end')
+	except ValueError:
+		pass
+	stagelist[stagenum].config(state="normal")
+	editlist[stagenum].config(state="normal")
+	for child in entry.winfo_children():
+		child.configure(state="disabled")
+	# dvsum = int(newrocket.delta_v())
+	# print(dvsum)
+	# newrocket.delta_v()
+		
 root = Tk()
 root.title("KSP Delta-V Calculator")
 
@@ -132,11 +142,11 @@ numStages = 5
 dv_lbl = ttk.Label(results, text="Delta-V", font="helvetica 8 bold")
 
 for i in range(1,numStages+1):
-    stagename = "Stage " + str(i)
-    newstage = ttk.Label(results, text=stagename, state="disabled")
-    stagelist.append(newstage)
-    dvlist.append(ttk.Label(results, text=""))
-    editlist.append(ttk.Button(results, text="Edit", state="disabled", command= lambda i=i: edit(i)))
+	stagename = "Stage " + str(i)
+	newstage = ttk.Label(results, text=stagename, state="disabled")
+	stagelist.append(newstage)
+	dvlist.append(ttk.Label(results, text=""))
+	editlist.append(ttk.Button(results, text="Edit", state="disabled", command= lambda i=i: edit(i)))
 total_lbl = ttk.Label(results, text="Total DV:")
 dv_sum = ttk.Label(results, text="")
 
@@ -170,10 +180,10 @@ results.grid(column=0, row=0, columnspan=4, rowspan=9, padx=10, pady=10)
 dv_lbl.grid(column=1, row=0, padx=6)
 
 for i in range(0,numStages):
-    rownum = i + 1
-    stagelist[i].grid(column=0, row=rownum, padx=6)
-    dvlist[i].grid(column=1, row=rownum)
-    editlist[i].grid(column=3, row=rownum, padx=6, pady=3)
+	rownum = i + 1
+	stagelist[i].grid(column=0, row=rownum, padx=6)
+	dvlist[i].grid(column=1, row=rownum)
+	editlist[i].grid(column=3, row=rownum, padx=6, pady=3)
 total_lbl.grid(column=0)
 dv_sum.grid(column=1, row=rownum+1)
 
