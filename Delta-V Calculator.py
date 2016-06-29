@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 import math
 
+
 #Define Rocket Class - Starting as just a list of stages.
 class rocket(object):
 	def __init__(self):
@@ -11,7 +12,6 @@ class rocket(object):
 	# Calculate and Return Total Delta-V
 	def delta_v(self):
 		total = 0
-		# print(total)
 		for stages in self.stages:
 			total = total + stages.delta_v()
 		return total
@@ -52,7 +52,7 @@ def clear_stage():
 # Function for "New Rocket" button
 def new():
 	clear_stage()
-	for i in range(0,numStages):
+	for i in range(0,NUM_STAGES):
 		stagelist[i].configure(state="disabled")
 		dvlist[i].configure(text="")
 		editlist[i].configure(state="disabled")
@@ -99,14 +99,26 @@ def done(*args):
 	editlist[stagenum].config(state="normal")
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
-			
+
+
+#Set up root and master frames to hold the notebook			
 root = Tk()
 root.title("KSP Delta-V Calculator")
+master = ttk.Frame(root, name='master')
+master.pack(fill=BOTH)
+
+#Define notebook pages and labels
+nb = ttk.Notebook(master)
+nb.pack(fill=BOTH, padx=2, pady=3)
+
+dv_content = ttk.Frame(nb)
+twr_content = ttk.Frame(nb)
+nb.add(dv_content, text='DV')
+nb.add(twr_content, text='TWR')
 
 # Define Frame Components
-content = ttk.Frame(root)
-results = ttk.Frame(content, borderwidth=5, relief="sunken")
-entry = ttk.Frame(content)
+results = ttk.Frame(dv_content, borderwidth=5, relief="sunken")
+entry = ttk.Frame(dv_content)
 
 # Variable definitions and intial values
 mass_var = StringVar()
@@ -119,7 +131,7 @@ stagenum = -1
 stagelist = []
 dvlist = []
 editlist = []
-numStages = 5
+NUM_STAGES = 5
 
 
 # Define Widgets
@@ -128,7 +140,7 @@ numStages = 5
 # Results Frame
 dv_lbl = ttk.Label(results, text="Delta-V", font="helvetica 8 bold")
 
-for i in range(1,numStages+1):
+for i in range(1,NUM_STAGES+1):
 	stagename = "Stage " + str(i)
 	newstage = ttk.Label(results, text=stagename, state="disabled")
 	stagelist.append(newstage)
@@ -154,19 +166,17 @@ isp_ent = ttk.Entry(entry, textvariable=isp_var, width=8, state="disabled")
 
 done_butt = ttk.Button(entry, text="Done", width=8, state="disabled", command=done)
 
-#Content Frame New Rocket Button
-new_butt = ttk.Button(content, text="New Rocket", command=new)
+#dv_content Frame New Rocket Button
+new_butt = ttk.Button(dv_content, text="New Rocket", command=new)
 
 
 # Place Widgets on Grid
 #
-#
-content.grid(column=0, row=0)
 # Results Frame
 results.grid(column=0, row=0, columnspan=4, rowspan=9, padx=10, pady=10)
 dv_lbl.grid(column=1, row=0, padx=6)
 
-for i in range(0,numStages):
+for i in range(0,NUM_STAGES):
 	rownum = i + 1
 	stagelist[i].grid(column=0, row=rownum, padx=6)
 	dvlist[i].grid(column=1, row=rownum)
@@ -192,7 +202,7 @@ ox_ent.grid(column=1, row=6, padx=6, pady=3, sticky=EW)
 isp_ent.grid(column=1, row=7, padx=6, pady=3, sticky=EW)
 done_butt.grid(column=1, row=8)
 
-# Content Frame
+# dv_content Frame
 new_butt.grid(column=0, row=9, pady=6)
 
 # Mainloop
