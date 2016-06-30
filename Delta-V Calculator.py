@@ -37,8 +37,8 @@ class Stage(object):
 		self.dv = math.log(self.mass_full/(self.mass_full-self.mass_fuel()))*self.Isp*9.81
 		return self.dv
 	#Returns the Trust to Weight Ratio for the stage
-	def TWR(self):
-		twr = self.thrust / (self.mass_full*9.82)
+	def twr(self, const):
+		twr = self.thrust / (self.mass_full*const)
 		return twr
 
 
@@ -131,6 +131,8 @@ type_var = IntVar()
 fuel_var = StringVar()
 ox_var = StringVar()
 isp_var = StringVar()
+thrust_var = StringVar()
+use_var = IntVar()
 thrust_condition_var = IntVar()
 ascent_mass_var = StringVar()
 #instatiate rocket object
@@ -140,6 +142,7 @@ stagenum = -1
 stagelist = []
 dvlist = []
 editlist = []
+twr_accel_list = []
 #setting global constants
 NUM_STAGES = 5
 
@@ -149,11 +152,13 @@ NUM_STAGES = 5
 # Widgets for Delta-V Tab
 # Results Frame on Delta-V Tab
 dv_lbl = ttk.Label(results, text="Delta-V", font="helvetica 8 bold")
+twr_lbl = ttk.Label(results, text="TWR/Accel", font="helvetica 8 bold")
 for i in range(1,NUM_STAGES+1):
 	stagename = "Stage " + str(i)
 	newstage = ttk.Label(results, text=stagename, state="disabled")
 	stagelist.append(newstage)
 	dvlist.append(ttk.Label(results, text=""))
+	twr_accel_list.append(ttk.Label(results, text=""))
 	editlist.append(ttk.Button(results, text="Edit", state="disabled", command= lambda i=i: edit(i)))
 total_lbl = ttk.Label(results, text="Total DV:")
 dv_sum = ttk.Label(results, text="")
@@ -165,6 +170,7 @@ FuelType_lbl = ttk.Label(entry, text="Fuel Type", state="disabled")
 FuelVol_lbl = ttk.Label(entry, text="Fuel Vol", state="disabled")
 OxVol_lbl = ttk.Label(entry, text="Oxidizer", state="disabled")
 isp_lbl = ttk.Label(entry, text="Isp", state="disabled")
+thrust_lbl = ttk.Label(entry, text="Thrust (kN)", state="disabled")
 # Entry fields/Radio Buttons/Button
 mass_ent = ttk.Entry(entry, textvariable=mass_var, width=8, state="disabled")
 typeL_ent = ttk.Radiobutton(entry, text="Liquid", variable=type_var, value=0, state="disabled")
@@ -172,6 +178,7 @@ typeS_ent = ttk.Radiobutton(entry, text="Solid", variable=type_var, value=1, sta
 fuel_ent = ttk.Entry(entry, textvariable=fuel_var, width=8, state="disabled")
 ox_ent = ttk.Entry(entry, textvariable=ox_var, width=8, state="disabled")
 isp_ent = ttk.Entry(entry, textvariable=isp_var, width=8, state="disabled")
+thrust_ent = ttk.Entry(entry, textvariable=thrust_var, width=8, state="disabled")
 done_butt = ttk.Button(entry, text="Done", width=8, state="disabled", command=done)
 #dv_content Frame New Rocket Button on Delta-V Tab
 new_butt = ttk.Button(dv_content, text="New Rocket", command=new)
@@ -192,10 +199,12 @@ thrust_mass_ent = ttk.Entry(thrust_main, textvariable=ascent_mass_var, width=8)
 # Results Frame
 results.grid(column=0, row=0, columnspan=4, rowspan=9, padx=10, pady=10) #Grids the results frame within dv_content
 dv_lbl.grid(column=1, row=0, padx=6)
+twr_lbl.grid(column=2, row=0, padx=6)
 for i in range(0,NUM_STAGES):
 	rownum = i + 1
 	stagelist[i].grid(column=0, row=rownum, padx=6)
 	dvlist[i].grid(column=1, row=rownum)
+	twr_accel_list[i].grid(column=2, row=rownum)
 	editlist[i].grid(column=3, row=rownum, padx=6, pady=3)
 total_lbl.grid(column=0)
 dv_sum.grid(column=1, row=rownum+1)
@@ -208,6 +217,7 @@ FuelType_lbl.grid(column=0, row=3, padx=6, pady=3, sticky=E)
 FuelVol_lbl.grid(column=0, row=5, padx=6, pady=3, sticky=E)
 OxVol_lbl.grid(column=0, row=6, padx=6, pady=3, sticky=E)
 isp_lbl.grid(column=0, row=7, padx=6, pady=3, sticky=E)
+thrust_lbl.grid(column=2, row=2, padx=6, pady=3, sticky=E)
 # Grid the entry widgets in entry frame
 mass_ent.grid(column=1, row=2, padx=6, pady=3, sticky=EW)
 typeL_ent.grid(column=1, row=3, sticky=W)
@@ -215,6 +225,7 @@ typeS_ent.grid(column=1, row=4, sticky=W)
 fuel_ent.grid(column=1, row=5, padx=6, pady=3, sticky=EW)
 ox_ent.grid(column=1, row=6, padx=6, pady=3, sticky=EW)
 isp_ent.grid(column=1, row=7, padx=6, pady=3, sticky=EW)
+thrust_ent.grid(column=3, row=2, padx=6, pady=3, sticky=EW)
 done_butt.grid(column=1, row=8)
 # Gris New Rocket button in dv_content frame
 new_butt.grid(column=0, row=9, pady=6)
