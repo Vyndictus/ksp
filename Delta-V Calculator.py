@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter import ttk
 import math
 
-
 #Define Rocket Class - Starting as just a list of stages.
 class Rocket(object):
 	def __init__(self):
@@ -18,13 +17,16 @@ class Rocket(object):
 		   
 #Define Stage Class
 class Stage(object):
-	def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, thrust=0):
+	def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, purpose, 
+				thrust, gravity=1):
 		self.mass_full = mass
 		self.fuel_type = fuel_type
 		self.fuel_vol = fuel_vol
 		self.ox_vol = ox_vol
 		self.Isp = Isp
 		self.thrust = thrust
+		self.purpose = purpose
+		self.gravity = gravity
 	#Returns Mass of the Fuel
 	def mass_fuel(self):
 		if self.fuel_type == 1:
@@ -34,13 +36,13 @@ class Stage(object):
 		return mass
 	#Returns Delta-V for the stage
 	def delta_v(self):
-		self.dv = math.log(self.mass_full/(self.mass_full-self.mass_fuel()))*self.Isp*9.81
+		self.dv = math.log(self.mass_full/(self.mass_full
+							-self.mass_fuel()))*self.Isp*9.81
 		return self.dv
 	#Returns the Trust to Weight Ratio for the stage
 	def twr(self, const):
 		twr = self.thrust / (self.mass_full*const)
 		return twr
-
 
 # Function for clearing stage entry value variable
 def clear_stage():
@@ -48,6 +50,10 @@ def clear_stage():
 	fuel_ent.delete(0, 'end')
 	ox_ent.delete(0, 'end')
 	isp_ent.delete(0, 'end')
+	thrust_ent.delete(0, 'end')
+	type_var.set(0)
+	purpose_var.set(0)
+	planet_var.set("Choose...")
 
 # Function for "New Rocket" button
 def new():
@@ -68,7 +74,8 @@ def edit(stage):
 	global stagenum
 	stagenum=int(stage)
 	for child in entry.winfo_children(): #If new stage - just enable all widgets
-			child.configure(state="normal")
+			if child not in [planet_lbl, planet_ent]:
+				child.configure(state="normal")
 	clear_stage()
 	if len(newrocket.stages) >= stagenum: #If Stage exists, populate with existing values
 		mass_var.set(newrocket.stages[stagenum-1].mass_full)
@@ -76,13 +83,16 @@ def edit(stage):
 		fuel_var.set(newrocket.stages[stagenum-1].fuel_vol)
 		ox_var.set(newrocket.stages[stagenum-1].ox_vol)
 		isp_var.set(newrocket.stages[stagenum-1].Isp)
-	
+		thrust_var.set(newrocket.stages[stagenum-1].thrust)
+		purpose_var.set(newrocket.stages[stagenum-1].purpose)
 	StageNum_lbl.configure(state="normal")
 	mass_lbl.configure(state="normal")
 	
 # Function for "Done" button
 def done(*args):
-	newstage = Stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),int(ox_var.get()),int(isp_var.get()))
+	newstage = Stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),
+					int(ox_var.get()),int(isp_var.get()), purpose_var.get(),
+					int(thrust_var.get()))
 	if len(newrocket.stages) >= stagenum:
 		newrocket.stages[stagenum-1] = newstage
 	else:
@@ -90,6 +100,9 @@ def done(*args):
 	try:
 		stage_dv = int(newstage.delta_v())
 		dvlist[stagenum-1].configure(text=str(stage_dv))
+		stage_twr = float(newstage.twr(newstage.gravity))
+		if newstage.gravity == 1:
+			twr_accel_list[stagenum-1].configure(text=str(int(stage_twr))+"m/s")
 		rocket_dv = int(newrocket.delta_v())
 		dv_sum.configure(text=str(rocket_dv))
 		clear_stage()
@@ -100,32 +113,25 @@ def done(*args):
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
 
-
+def enable_disable_planet():
+	if purpose_var.get() == 1:
+		planet_lbl.configure(state="normal")
+		planet_ent.configure(state="normal")
+	else:
+		planet_lbl.configure(state="disabled")
+		planet_ent.configure(state="disabled")
+	
 # Tkinter Layout Element Definitions
 # Set up root and master frames to hold the notebook			
 root = Tk()
 root.title("KSP Toolkit")
-# Define notebook object
-nb = ttk.Notebook(root)
-nb.pack(fill=BOTH, padx=2, pady=3)
-# Define content frames and add as tabs in the notebook "nb"
-dv_content = ttk.Frame(nb)
-twr_content = ttk.Frame(nb)
-nb.add(dv_content, underline=0, text='Delta-V')
-nb.add(twr_content, underline=0, text='Thrust')
-# Enable keyboard traversal of tabs
-nb.enable_traversal()
-
-# Define Frame Components on the Delta-V Tab
+dv_content = ttk.Frame(root)
+dv_content.pack(fill=BOTH, padx=3, pady=3)
 results = ttk.Frame(dv_content, borderwidth=5, relief="sunken")
 entry = ttk.Frame(dv_content)
-# Define Frame components on the Thrust tab
-thrust_main = ttk.Frame(twr_content)
-ascent_frame = ttk.Frame(twr_content)
-orbit_frame = ttk.Frame(twr_content)
 
 # Variable definitions and intial values
-# Tkinter entry variables
+# Define Tkinter entry variables
 mass_var = StringVar()
 type_var = IntVar()
 fuel_var = StringVar()
@@ -134,18 +140,23 @@ isp_var = StringVar()
 thrust_var = StringVar()
 purpose_var = IntVar()
 use_var = IntVar()
+planet_var = StringVar()
 thrust_condition_var = IntVar()
 ascent_mass_var = StringVar()
-#instatiate rocket object
+# instatiate objects
 newrocket = Rocket()
-#initial value settings for global variables and lists/dictionaries
+# initialize global variables and dynamic lists
 stagenum = -1
 stagelist = []
 dvlist = []
 editlist = []
 twr_accel_list = []
-#setting global constants
+# set global constants, tuples, and static dictionaries
 NUM_STAGES = 5
+PLANET_LIST = ('Choose...', 'Moho', 'Eve', 'Gilly', 'Kerbin', 'Mun', 'Minmus', 'Duna',
+				'Ike', 'Dres', 'Jool', 'Laythe', 'Vall', 'Tylo', 'Bop',
+				'Pol', 'Eeloo')
+GRAV_DICT = []
 
 
 # Define Widgets
@@ -160,7 +171,8 @@ for i in range(1,NUM_STAGES+1):
 	stagelist.append(newstage)
 	dvlist.append(ttk.Label(results, text=""))
 	twr_accel_list.append(ttk.Label(results, text=""))
-	editlist.append(ttk.Button(results, text="Edit", state="disabled", command= lambda i=i: edit(i)))
+	editlist.append(ttk.Button(results, text="Edit", state="disabled", 
+					command= lambda i=i: edit(i)))
 total_lbl = ttk.Label(results, text="Total DV:")
 dv_sum = ttk.Label(results, text="")
 # Entry Frame on Delta-V Tab
@@ -173,6 +185,7 @@ OxVol_lbl = ttk.Label(entry, text="Oxidizer", state="disabled")
 isp_lbl = ttk.Label(entry, text="Isp", state="disabled")
 thrust_lbl = ttk.Label(entry, text="Thrust (kN)", state="disabled")
 purpose_lbl = ttk.Label(entry, text="Purpose", state="disabled")
+planet_lbl = ttk.Label(entry, text="Planet", state="disabled")
 # Entry fields/Radio Buttons/Button
 mass_ent = ttk.Entry(entry, textvariable=mass_var, width=8, state="disabled")
 typeL_ent = ttk.Radiobutton(entry, text="Liquid", variable=type_var, value=0, state="disabled")
@@ -181,21 +194,20 @@ fuel_ent = ttk.Entry(entry, textvariable=fuel_var, width=8, state="disabled")
 ox_ent = ttk.Entry(entry, textvariable=ox_var, width=8, state="disabled")
 isp_ent = ttk.Entry(entry, textvariable=isp_var, width=8, state="disabled")
 thrust_ent = ttk.Entry(entry, textvariable=thrust_var, width=8, state="disabled")
-purpose_o_ent = ttk.Radiobutton(entry, text="Orbit", variable=purpose_var, value=0, state="disabled")
-purpose_a_ent = ttk.Radiobutton(entry, text="Ascent", variable=purpose_var, value=1, state="disabled")
+
+planet_ent = ttk.OptionMenu(entry, planet_var, *PLANET_LIST)
+
+purpose_o_ent = ttk.Radiobutton(entry, text="Orbital Maneuver", 
+								variable=purpose_var, value=0, state="disabled",
+								command= lambda: enable_disable_planet())
+purpose_a_ent = ttk.Radiobutton(entry, text="Ascent/Lander", 
+								variable=purpose_var, value=1, state="disabled",
+								command= lambda: enable_disable_planet())
+planet_ent.configure(state="disabled")
 done_butt = ttk.Button(entry, text="Done", width=8, state="disabled", command=done)
 #dv_content Frame New Rocket Button on Delta-V Tab
 new_butt = ttk.Button(dv_content, text="New Rocket", command=new)
-#
-# Widgets for Thrust tab
-# Labels
-condition_lbl = ttk.Label(thrust_main, text="Stage Engine Use:")
-thrust_mass_lbl = ttk.Label(thrust_main, text="Mass")
-# Entry widgets 
-cond_ascent_ent = ttk.Radiobutton(thrust_main, text="Ascent", variable=thrust_condition_var, value=0)
-cond_orbit_ent = ttk.Radiobutton(thrust_main, text="Orbital", variable=thrust_condition_var, value=1)
-thrust_mass_ent = ttk.Entry(thrust_main, textvariable=ascent_mass_var, width=8)
-#
+
 
 # Place Widgets on Grid
 #
@@ -223,6 +235,7 @@ OxVol_lbl.grid(column=0, row=6, padx=6, pady=3, sticky=E)
 isp_lbl.grid(column=0, row=7, padx=6, pady=3, sticky=E)
 thrust_lbl.grid(column=2, row=2, padx=6, pady=3, sticky=E)
 purpose_lbl.grid(column=2, row=3, padx=6, pady=3, sticky=E)
+planet_lbl.grid(column=2, row=5, padx=6, pady=3, sticky=E)
 # Grid the entry widgets in entry frame
 mass_ent.grid(column=1, row=2, padx=6, pady=3, sticky=EW)
 typeL_ent.grid(column=1, row=3, sticky=W)
@@ -230,25 +243,13 @@ typeS_ent.grid(column=1, row=4, sticky=W)
 fuel_ent.grid(column=1, row=5, padx=6, pady=3, sticky=EW)
 ox_ent.grid(column=1, row=6, padx=6, pady=3, sticky=EW)
 isp_ent.grid(column=1, row=7, padx=6, pady=3, sticky=EW)
-thrust_ent.grid(column=3, row=2, padx=6, pady=3, sticky=EW)
-purpose_a_ent.grid(column=3, row=3, padx=6, pady=3, sticky=EW)
-purpose_o_ent.grid(column=3, row=4, padx=6, pady=3, sticky=EW)
+thrust_ent.grid(column=3, row=2, padx=6, pady=3, sticky=W)
+purpose_o_ent.grid(column=3, row=3, padx=6, pady=3, sticky=EW)
+purpose_a_ent.grid(column=3, row=4, padx=6, pady=3, sticky=EW)
+planet_ent.grid(column=3, row=5, padx=0, pady=3, sticky=W)
 done_butt.grid(column=1, row=8)
-# Gris New Rocket button in dv_content frame
+# Grid New Rocket button in dv_content frame
 new_butt.grid(column=0, row=9, pady=6)
-#
-# Thrust Tab
-thrust_main.grid(column=0, row=0) # Grids the thrust_main frame within twr_content 
-# Grid label and entry widgets in thrust_main frame
-condition_lbl.grid(column=0, row=0, columnspan=2, padx=6, pady=3, sticky=EW)
-cond_ascent_ent.grid(column=0, row=1, columnspan=2, padx=6)
-cond_orbit_ent.grid(column=0, row=2, columnspan=2, padx=6)
-thrust_mass_lbl.grid(column=0, row=3, padx=6, pady=3, sticky=E)
-thrust_mass_ent.grid(column=1, row=3, padx=6, pady=3)
-# Ascent Entry Frame
-# ascent_frame.grid(column=3, row=0, pady=3) # Grids the ascent entry frame to the righ of the condition choice
-# thrust_mass_lbl.grid(column=0, row=0, padx=6, pady=3)
-# thrust_mass_ent.grid(column=1, row=0, padx=6, pady=3)
 
 # Mainloop
 root.mainloop()
