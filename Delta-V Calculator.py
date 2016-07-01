@@ -61,6 +61,7 @@ def new():
 	for i in range(0,NUM_STAGES):
 		stagelist[i].configure(state="disabled")
 		dvlist[i].configure(text="")
+		twr_accel_list.configure(text="")
 		editlist[i].configure(state="disabled")
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
@@ -92,7 +93,7 @@ def edit(stage):
 def done(*args):
 	newstage = Stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),
 					int(ox_var.get()),int(isp_var.get()), purpose_var.get(),
-					int(thrust_var.get()))
+					int(thrust_var.get()), float(GRAV_DICT[planet_var.get()]))
 	if len(newrocket.stages) >= stagenum:
 		newrocket.stages[stagenum-1] = newstage
 	else:
@@ -103,6 +104,8 @@ def done(*args):
 		stage_twr = float(newstage.twr(newstage.gravity))
 		if newstage.gravity == 1:
 			twr_accel_list[stagenum-1].configure(text=str(int(stage_twr))+"m/s")
+		else:
+			twr_accel_list[stagenum-1].configure(text=str(round(stage_twr, 2)))
 		rocket_dv = int(newrocket.delta_v())
 		dv_sum.configure(text=str(rocket_dv))
 		clear_stage()
@@ -156,7 +159,9 @@ NUM_STAGES = 5
 PLANET_LIST = ('Choose...', 'Moho', 'Eve', 'Gilly', 'Kerbin', 'Mun', 'Minmus', 'Duna',
 				'Ike', 'Dres', 'Jool', 'Laythe', 'Vall', 'Tylo', 'Bop',
 				'Pol', 'Eeloo')
-GRAV_DICT = []
+GRAV_DICT = {'Choose...':1, 'Moho':2.7, 'Eve':16.7, 'Gilly':0.049, 'Kerbin':9.81, 'Mun':1.63, 'Minmus':0.49, 'Duna':2.94,
+				'Ike':1.1, 'Dres':1.13, 'Jool':7.85, 'Laythe':7.85, 'Vall':2.31, 'Tylo':7.85, 'Bop':0.589,
+				'Pol':0.373, 'Eeloo':1.69}
 
 
 # Define Widgets
