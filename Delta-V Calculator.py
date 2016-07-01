@@ -61,7 +61,7 @@ def new():
 	for i in range(0,NUM_STAGES):
 		stagelist[i].configure(state="disabled")
 		dvlist[i].configure(text="")
-		twr_accel_list.configure(text="")
+		twr_accel_list[i].configure(text="")
 		editlist[i].configure(state="disabled")
 	for child in entry.winfo_children():
 		child.configure(state="disabled")
