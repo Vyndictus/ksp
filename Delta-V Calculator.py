@@ -18,7 +18,7 @@ class Rocket(object):
 #Define Stage Class
 class Stage(object):
 	def __init__(self, mass, fuel_type, fuel_vol, ox_vol, Isp, purpose, 
-				thrust, gravity=1):
+				thrust, planet="Choose..."):
 		self.mass_full = mass
 		self.fuel_type = fuel_type
 		self.fuel_vol = fuel_vol
@@ -26,7 +26,7 @@ class Stage(object):
 		self.Isp = Isp
 		self.thrust = thrust
 		self.purpose = purpose
-		self.gravity = gravity
+		self.planet = planet
 	#Returns Mass of the Fuel
 	def mass_fuel(self):
 		if self.fuel_type == 1:
@@ -40,8 +40,8 @@ class Stage(object):
 							-self.mass_fuel()))*self.Isp*9.81
 		return self.dv
 	#Returns the Trust to Weight Ratio for the stage
-	def twr(self, const):
-		twr = self.thrust / (self.mass_full*const)
+	def twr(self):
+		twr = self.thrust / (self.mass_full*GRAV_DICT[self.planet])
 		return twr
 
 # Function for clearing stage entry value variable
@@ -74,11 +74,17 @@ def new():
 def edit(stage):
 	global stagenum
 	stagenum=int(stage)
-	for child in entry.winfo_children(): #If new stage - just enable all widgets
+	for child in entry.winfo_children(): # If newrocket - Enable entry field widgets 
 			if child not in [planet_lbl, planet_ent]:
 				child.configure(state="normal")
 	clear_stage()
 	if len(newrocket.stages) >= stagenum: #If Stage exists, populate with existing values
+		if newrocket.stages[stagenum-1].purpose == 1:
+			planet_ent.configure(state="normal")
+			planet_lbl.configure(state="normal")
+		else:
+			planet_ent.configure(state="disabled")
+			planet_lbl.configure(state="disabled")
 		mass_var.set(newrocket.stages[stagenum-1].mass_full)
 		type_var.set(newrocket.stages[stagenum-1].fuel_type)
 		fuel_var.set(newrocket.stages[stagenum-1].fuel_vol)
@@ -86,14 +92,15 @@ def edit(stage):
 		isp_var.set(newrocket.stages[stagenum-1].Isp)
 		thrust_var.set(newrocket.stages[stagenum-1].thrust)
 		purpose_var.set(newrocket.stages[stagenum-1].purpose)
-	StageNum_lbl.configure(state="normal")
+		planet_var.set(newrocket.stages[stagenum-1].planet)
+	stage_frame_lbl.configure(state="normal")
 	mass_lbl.configure(state="normal")
 	
 # Function for "Done" button
 def done(*args):
 	newstage = Stage(float(mass_var.get()),type_var.get(),int(fuel_var.get()),
 					int(ox_var.get()),int(isp_var.get()), purpose_var.get(),
-					int(thrust_var.get()), float(GRAV_DICT[planet_var.get()]))
+					int(thrust_var.get()), (planet_var.get()))
 	if len(newrocket.stages) >= stagenum:
 		newrocket.stages[stagenum-1] = newstage
 	else:
@@ -101,8 +108,8 @@ def done(*args):
 	try:
 		stage_dv = int(newstage.delta_v())
 		dvlist[stagenum-1].configure(text=str(stage_dv))
-		stage_twr = float(newstage.twr(newstage.gravity))
-		if newstage.gravity == 1:
+		stage_twr = float(newstage.twr())
+		if GRAV_DICT[newstage.planet] == 1:
 			twr_accel_list[stagenum-1].configure(text=str(int(stage_twr))+"m/s")
 		else:
 			twr_accel_list[stagenum-1].configure(text=str(round(stage_twr, 2)))
@@ -182,7 +189,7 @@ total_lbl = ttk.Label(results, text="Total DV:")
 dv_sum = ttk.Label(results, text="")
 # Entry Frame on Delta-V Tab
 # Labels
-StageNum_lbl = ttk.Label(entry, text="Stage:", state="disabled")
+stage_frame_lbl = ttk.Label(entry, text="Stage Information Entry:", state="disabled")
 mass_lbl = ttk.Label(entry, text="Mass", state="disabled")
 FuelType_lbl = ttk.Label(entry, text="Fuel Type", state="disabled")
 FuelVol_lbl = ttk.Label(entry, text="Fuel Vol", state="disabled")
@@ -232,7 +239,7 @@ dv_sum.grid(column=1, row=rownum+1)
 # Entry Frame
 entry.grid(column=4, row=0, pady=10) # Grids the entry fram within dv_content
 # Grid the label widgets in entry frame
-StageNum_lbl.grid(column=0, row=0, padx=6, pady=3, sticky=E)
+stage_frame_lbl.grid(column=0, columnspan=2, row=0, padx=6, pady=3, sticky=E)
 mass_lbl.grid(column=0, row=2, padx=6, pady=3, sticky=E)
 FuelType_lbl.grid(column=0, row=3, padx=6, pady=3, sticky=E)
 FuelVol_lbl.grid(column=0, row=5, padx=6, pady=3, sticky=E)
