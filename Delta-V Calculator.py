@@ -109,7 +109,7 @@ def done(*args):
 		stage_dv = int(newstage.delta_v())
 		dvlist[stagenum-1].configure(text=str(stage_dv))
 		stage_twr = float(newstage.twr())
-		if GRAV_DICT[newstage.planet] == 1:
+		if purpose_var.get() == 0:
 			twr_accel_list[stagenum-1].configure(text=str(int(stage_twr))+"m/s")
 		else:
 			twr_accel_list[stagenum-1].configure(text=str(round(stage_twr, 2)))
@@ -130,6 +130,7 @@ def enable_disable_planet():
 	else:
 		planet_lbl.configure(state="disabled")
 		planet_ent.configure(state="disabled")
+		planet_var.set("Choose...")
 	
 # Tkinter Layout Element Definitions
 # Set up root and master frames to hold the notebook			
