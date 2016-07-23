@@ -3,7 +3,6 @@
 from tkinter import *
 from tkinter import ttk
 import math
-import krpc #krpc is a library for connecting to Kerbal via Remote Procedure Calls
 
 #Define Rocket Class - Starting as just a list of stages.
 class Rocket(object):
@@ -134,18 +133,13 @@ def enable_disable_planet():
 		planet_var.set("Choose...")
 	
 # Tkinter Layout Element Definitions
-# Set up the notebook			
+# Set up root and master frames to hold the notebook			
 root = Tk()
 root.title("KSP Toolkit")
-nb = ttk.Notebook(root)
-nb.pack(fill=BOTH, padx=2, pady=3)
-dv_content = ttk.Frame(nb)
-krpc_content = ttk.Frame(nb)
+dv_content = ttk.Frame(root)
 dv_content.pack(fill=BOTH, padx=3, pady=3)
 results = ttk.Frame(dv_content, borderwidth=5, relief="sunken")
 entry = ttk.Frame(dv_content)
-nb.add(dv_content, text=' Build Tool ')
-nb.add(krpc_content, text=' In-Flight Data ')
 
 # Variable definitions and intial values
 # Define Tkinter entry variables
@@ -180,8 +174,8 @@ GRAV_DICT = {'Choose...':1, 'Moho':2.7, 'Eve':16.7, 'Gilly':0.049, 'Kerbin':9.81
 
 # Define Widgets
 #
-# Widgets for Builders Tab
-# Results Frame on Builders Tab
+# Widgets for Delta-V Tab
+# Results Frame on Delta-V Tab
 dv_lbl = ttk.Label(results, text="Delta-V", font="helvetica 8 bold")
 twr_lbl = ttk.Label(results, text="TWR/Accel", font="helvetica 8 bold")
 for i in range(1,NUM_STAGES+1):
@@ -194,7 +188,7 @@ for i in range(1,NUM_STAGES+1):
 					command= lambda i=i: edit(i)))
 total_lbl = ttk.Label(results, text="Total DV:")
 dv_sum = ttk.Label(results, text="")
-# Entry Frame on Builders Tab
+# Entry Frame on Delta-V Tab
 # Labels
 stage_frame_lbl = ttk.Label(entry, text="Stage Information Entry:", state="disabled")
 mass_lbl = ttk.Label(entry, text="Mass", state="disabled")
@@ -213,7 +207,9 @@ fuel_ent = ttk.Entry(entry, textvariable=fuel_var, width=8, state="disabled")
 ox_ent = ttk.Entry(entry, textvariable=ox_var, width=8, state="disabled")
 isp_ent = ttk.Entry(entry, textvariable=isp_var, width=8, state="disabled")
 thrust_ent = ttk.Entry(entry, textvariable=thrust_var, width=8, state="disabled")
+
 planet_ent = ttk.OptionMenu(entry, planet_var, *PLANET_LIST)
+
 purpose_o_ent = ttk.Radiobutton(entry, text="Orbital Maneuver", 
 								variable=purpose_var, value=0, state="disabled",
 								command= lambda: enable_disable_planet())
@@ -222,13 +218,8 @@ purpose_a_ent = ttk.Radiobutton(entry, text="Ascent/Lander",
 								command= lambda: enable_disable_planet())
 planet_ent.configure(state="disabled")
 done_butt = ttk.Button(entry, text="Done", width=8, state="disabled", command=done)
-#dv_content Frame New Rocket Button on Builder Tab
+#dv_content Frame New Rocket Button on Delta-V Tab
 new_butt = ttk.Button(dv_content, text="New Rocket", command=new)
-#
-# Widget definitions for In-Flight Tab
-# Labels
-krpc_stage_header = ttk.Label(krpc_content, text="Current Stage Information", font="helvetica 8 bold")
-krpc_mass = ttk.Label(krpc_content, text="Mass:")
 
 
 # Place Widgets on Grid
@@ -254,27 +245,24 @@ mass_lbl.grid(column=0, row=2, padx=6, pady=3, sticky=E)
 FuelType_lbl.grid(column=0, row=3, padx=6, pady=3, sticky=E)
 FuelVol_lbl.grid(column=0, row=5, padx=6, pady=3, sticky=E)
 OxVol_lbl.grid(column=0, row=6, padx=6, pady=3, sticky=E)
-isp_lbl.grid(column=2, row=2, padx=6, pady=3, sticky=E)
-thrust_lbl.grid(column=2, row=3, padx=6, pady=3, sticky=E)
-purpose_lbl.grid(column=2, row=4, padx=6, pady=3, sticky=E)
-planet_lbl.grid(column=2, row=6, padx=6, pady=3, sticky=E)
+isp_lbl.grid(column=0, row=7, padx=6, pady=3, sticky=E)
+thrust_lbl.grid(column=2, row=2, padx=6, pady=3, sticky=E)
+purpose_lbl.grid(column=2, row=3, padx=6, pady=3, sticky=E)
+planet_lbl.grid(column=2, row=5, padx=6, pady=3, sticky=E)
 # Grid the entry widgets in entry frame
 mass_ent.grid(column=1, row=2, padx=6, pady=3, sticky=EW)
 typeL_ent.grid(column=1, row=3, sticky=W)
 typeS_ent.grid(column=1, row=4, sticky=W)
 fuel_ent.grid(column=1, row=5, padx=6, pady=3, sticky=EW)
 ox_ent.grid(column=1, row=6, padx=6, pady=3, sticky=EW)
-isp_ent.grid(column=3, row=2, padx=6, pady=3, sticky=W)
-thrust_ent.grid(column=3, row=3, padx=6, pady=3, sticky=W)
-purpose_o_ent.grid(column=3, row=4, padx=6, pady=3, sticky=EW)
-purpose_a_ent.grid(column=3, row=5, padx=6, pady=3, sticky=EW)
-planet_ent.grid(column=3, row=6, padx=0, pady=3, sticky=W)
+isp_ent.grid(column=1, row=7, padx=6, pady=3, sticky=EW)
+thrust_ent.grid(column=3, row=2, padx=6, pady=3, sticky=W)
+purpose_o_ent.grid(column=3, row=3, padx=6, pady=3, sticky=EW)
+purpose_a_ent.grid(column=3, row=4, padx=6, pady=3, sticky=EW)
+planet_ent.grid(column=3, row=5, padx=0, pady=3, sticky=W)
 done_butt.grid(column=1, row=8)
 # Grid New Rocket button in dv_content frame
 new_butt.grid(column=0, row=9, pady=6)
-# In-Flight Tab
-krpc_stage_header.grid(column=0, row=0)
-krpc_mass.grid(column=0, row=1)
 
 # Mainloop
 root.mainloop()
